@@ -19,7 +19,7 @@ def run_web():
 Thread(target=run_web, daemon=True).start()
 
 # --- 2. Telegram ---
-TOKEN = os.environ.get("8738317837:AAFlPobuYU-oF2Jb7lryUmSj7nfgbDlR4PM")
+TOKEN = os.environ.get("BOT_TOKEN")
 ADMIN_ID = 8466271479
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
