@@ -75,7 +75,7 @@ async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.forward_message(chat_id=ADMIN_ID, from_chat_id=update.effective_chat.id, message_id=update.message.message_id)
     except:
         pass
-    keyboard = [[InlineKeyboardButton(f"✅ Получить файлы за {price} тг", callback_data=f"check_{price}")]]
+        keyboard = [[InlineKeyboardButton(f"✅ Получить файлы за {price} тг", callback_data=f"check_{price}")]]
     await update.message.reply_text("Чек получил! Нажми кнопку:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 print("Bot started... ФИНАЛ ВЕРСИЯ с flask_app")
