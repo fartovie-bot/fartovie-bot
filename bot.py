@@ -1,22 +1,24 @@
 import os
 from flask import Flask
 from threading import Thread
+import asyncio
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 
-app = Flask(__name__)
-@app.route('/')
+# --- 1. Flask для Render ---
+flask_app = Flask(__name__)
+@flask_app.route('/')
 def home():
     return "Fartovie bot is alive!"
 
 def run_web():
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    flask_app.run(host='0.0.0.0', port=port)
 
 Thread(target=run_web, daemon=True).start()
-import asyncio
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 
-TOKEN = "8738317837:AAFa5YnMtUD6xuZKnL7HIafcbWu9s1QxaF4"
+# --- 2. Telegram Bot ---
+TOKEN = os.environ.get("BOT_TOKEN", "8738317837:AAFa5YnMtUD6xuZKnL7HIafcbWu9s1QxaF4")
 ADMIN_ID = 8466271479
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -71,9 +73,9 @@ async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton(f"✅ Получить файлы за {price} тг", callback_data=f"check_{price}")]]
     await update.message.reply_text("Чек получил! Нажми кнопку:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-app = Application.builder().token(TOKEN).connect_timeout(120).read_timeout(120).write_timeout(120).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CallbackQueryHandler(handle_buttons))
-app.add_handler(MessageHandler(filters.PHOTO, handle_screenshot))
 print("Bot started... ФИНАЛ ВЕРСИЯ")
-app.run_polling()
+telegram_app = Application.builder().token(TOKEN).connect_timeout(120).read_timeout(120).write_timeout(120).build()
+telegram_app.add_handler(CommandHandler("start", start))
+telegram_app.add_handler(CallbackQueryHandler(handle_buttons))
+telegram_app.add_handler(MessageHandler(filters.PHOTO, handle_screenshot))
+telegram_app.run_polling()
