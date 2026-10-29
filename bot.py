@@ -5,8 +5,9 @@ import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 
-# --- 1. Flask для Render ---
+# --- 1. Flask для Render (чтобы не засыпал) ---
 flask_app = Flask(__name__)
+
 @flask_app.route('/')
 def home():
     return "Fartovie bot is alive!"
@@ -18,7 +19,11 @@ def run_web():
 Thread(target=run_web, daemon=True).start()
 
 # --- 2. Telegram Bot ---
-TOKEN = os.environ.get("BOT_TOKEN", "8738317837:AAFa5YnMtUD6xuZKnL7HIafcbWu9s1QxaF4")
+# Токен берем из Render -> Environment -> BOT_TOKEN
+TOKEN = os.environ.get("BOT_TOKEN")
+if not TOKEN:
+    TOKEN = "8738317837:AAFlPobuYU-oF2Jb7lryUmSj7nfgbDlR4PM" 
+
 ADMIN_ID = 8466271479
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -41,7 +46,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if os.path.exists(qr_file):
             await context.bot.send_photo(chat_id=query.from_user.id, photo=open(qr_file, "rb"), caption=f"Оплати {price} тг по QR.\nПосле оплаты скинь СКРИН чека сюда 👇")
         else:
-            await query.message.reply_text(f"QR {qr_file} не найден")
+            await query.message.reply_text(f"QR {qr_file} не найден, добавь в GitHub")
     elif data.startswith("check_"):
         price = data.split("_")[1]
         try:
@@ -54,7 +59,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif price == "4990":
                 with open("scenarios.pdf", "rb") as f:
                     await context.bot.send_document(chat_id=query.from_user.id, document=f, caption="Часть 1/2 - Сценарии")
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
                 with open("prompts.pdf", "rb") as f:
                     await context.bot.send_document(chat_id=query.from_user.id, document=f, caption="Часть 2/2 - 100 промптов 💎")
             await query.message.reply_text("Готово! ✅")
@@ -73,7 +78,7 @@ async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton(f"✅ Получить файлы за {price} тг", callback_data=f"check_{price}")]]
     await update.message.reply_text("Чек получил! Нажми кнопку:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-print("Bot started... ФИНАЛ ВЕРСИЯ")
+print("Bot started... ФИНАЛ ВЕРСИЯ с flask_app")
 telegram_app = Application.builder().token(TOKEN).connect_timeout(120).read_timeout(120).write_timeout(120).build()
 telegram_app.add_handler(CommandHandler("start", start))
 telegram_app.add_handler(CallbackQueryHandler(handle_buttons))
